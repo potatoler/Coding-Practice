@@ -45,7 +45,8 @@ inline void Divide_and_Conquer(int l, int r){
         mn[j] = min(mn[j-1], a[j]);
     }
     // If the max and min value are both on the left:
-    for(i = mid; i>=l; i--){
+    for(i = mid; i>=l; i--){:q
+		``
         j = mx[i] - mn[i] + i;
         if(j <= r && j > mid && mx[i] > mx[j] && mn[i] < mn[j]) ans++;
     }
