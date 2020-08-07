@@ -30,7 +30,7 @@ inline int Read(){
 	return num * op;
 }
 
-inline void AddEdge(int u, int v, int c, int f){
+inline voidd AddEdge(int u, int v, int c, int f){
 	cntEdge++;
 	edge[cntEdge].destination = v;
 	edge[cntEdge].nextEdge = head[u];
