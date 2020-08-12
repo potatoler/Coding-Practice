@@ -15,7 +15,7 @@ struct Edge{
 }edge[MaxN * 4];
 struct SegmentTree{
 	int size, ls, rs;
-}tree[MaxN * 600];
+}tree[MaxN * 300];
 int value[MaxN], father[MaxN], son[MaxN], head[MaxN], root[MaxN], cntTree;
 int cur[MaxN], size;
 inline int Read(){
