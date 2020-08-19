@@ -34,7 +34,7 @@ inline void Insert(int &x, int l, int r, int pos){
 	if(!x) x = ++cntTree;
 	tree[x].sum++;
 	if(l == r) return;
-	int mid = (l + r) >> 1;
+	int mid = l+(r-l)/2;
 	if(pos <= mid) Insert(tree[x].ls, l, mid, pos);
 	else Insert(tree[x].rs, mid+1, r, pos);
 	return;
@@ -42,14 +42,14 @@ inline void Insert(int &x, int l, int r, int pos){
 
 inline int Ask(int x, int l, int r, int pos){
 	if(!tree[x].sum || l == r) return 0;
-	int mid = (l + r) >> 1;
+	int mid = l+(r-l)/2;
 	if(pos <= mid) return Ask(tree[x].ls, l, mid, pos);
 	else return Ask(tree[x].rs, mid+1, r, pos) + tree[tree[x].ls].sum;
 }
 
 inline int Find(int x, int k, int l, int r){
 	if(l == r) return l;
-	int mid = (l + r) >> 1;
+	int mid = l+(r-l)/2;
 	int rank = max((long long)0, min(R,mid) - max(L,l) + 1 - tree[tree[x].ls].sum);
 	return rank >= k ? Find(tree[x].ls, k, l, mid) : Find(tree[x].rs, k-rank,  mid+1, r);
 }
