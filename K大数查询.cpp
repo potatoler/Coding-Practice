@@ -1,118 +1,122 @@
-#include <iostream>
-#include <cstring>
-#include <cstdio>
-#include <algorithm>
-#include <vector>
-
+#include<iostream>
+#include<cstdio>
+#include<cstdlib>
+#include<cmath>
+#include<cstring>
+#include<climits>
+#include<algorithm>
+#include<vector>
 using namespace std;
-
-const int N = 50010, P = N * 17 * 17, M = N * 4;
-
+const int MaxN = 50004;
 int n, m;
-struct Tree
-{
-	int l, r, sum, add;
-}tr[P];
-int L[M], R[M], T[M], idx;
-struct Query
-{
+
+struct Outer_Segment_Tree{
+	int ls, rs, sum, add;
+}outer_tree[MaxN*17*17];
+
+int cnt;
+struct Inner_Sgenment_Tree{
+	int l, r, serial;
+}inner_tree[MaxN*4];
+
+struct Query{
 	int op, a, b, c;
-}q[N];
-vector<int> nums;
+}query[MaxN];
+vector<int> question;
 
-int get(int x)
-{
-	return lower_bound(nums.begin(), nums.end(), x) - nums.begin();
+inline int Read(){
+	int num = 0, op = 1;
+	char ch = getchar();
+	while(!isdigit(ch)){
+		if(ch == '-') op = -1;
+		ch = getchar();
+	}
+	while(isdigit(ch)){
+		num = num * 10 + ch - '0';
+		ch = getchar();
+	}
+	return num * op;
 }
 
-void build(int u, int l, int r)
-{
-	L[u] = l, R[u] = r, T[u] = ++ idx;
-	if (l == r) return;
-	int mid = l + r >> 1;
-	build(u << 1, l, mid), build(u << 1 | 1, mid + 1, r);
+inline int Get(int x){
+	return lower_bound(question.begin(), question.end(), x) - question.begin();
 }
 
-int intersection(int a, int b, int c, int d)
-{
-	return min(b, d) - max(a, c) + 1;
+inline int Intersection(int l, int r, int ll, int rr){
+	return min(r, rr) - max(l, ll) + 1;
 }
 
-void update(int u, int l, int r, int pl, int pr)
-{
-	tr[u].sum += intersection(l, r, pl, pr);
-	if (l >= pl && r <= pr)
-	{
-		tr[u].add ++ ;
+inline void Build(int x, int l, int r){
+	inner_tree[x].l = l, inner_tree[x].r = r, inner_tree[x].serial = ++cnt;
+	if(l == r) return;
+	int mid = (l + r) >> 1;
+	Build(x<<1, l, mid), Build(x<<1|1, mid+1, r);
+	return;
+}
+
+inline void Update(int x, int l, int r, int ll, int rr){
+	outer_tree[x].sum += Intersection(l, r, ll, rr);
+	if(ll <= l && r <= rr){
+		outer_tree[x].add++;
 		return;
 	}
-	int mid = l + r >> 1;
-	if (pl <= mid)
-	{
-		if (!tr[u].l) tr[u].l = ++ idx;
-		update(tr[u].l, l, mid, pl, pr);
+	int mid = (l + r) >> 1;
+	if(ll <= mid){
+		if(!outer_tree[x].ls) outer_tree[x].ls = ++cnt;
+		Update(outer_tree[x].ls, l, mid, ll, rr);
 	}
-	if (pr > mid)
-	{
-		if (!tr[u].r) tr[u].r = ++ idx;
-		update(tr[u].r, mid + 1, r, pl, pr);
+	if(rr > mid){
+		if(!outer_tree[x].rs) outer_tree[x].rs = ++cnt;
+		Update(outer_tree[x].rs, mid+1, r, ll, rr);
 	}
+	return;
 }
 
-void change(int u, int a, int b, int c)
-{
-	update(T[u], 1, n, a, b);
-	if (L[u] == R[u]) return;
-	int mid = L[u] + R[u] >> 1;
-	if (c <= mid) change(u << 1, a, b, c);
-	else change(u << 1 | 1, a, b, c);
+inline void Change(int x, int l, int r, int pos){
+	Update(inner_tree[x].serial, 1, n, l, r);
+	if(inner_tree[x].l == inner_tree[x].r) return;
+	int mid = (inner_tree[x].l + inner_tree[x].r) >> 1;
+	if(pos <= mid) Change(x<<1, l, r, pos);
+	else Change(x<<1|1, l, r, pos);
+	return;
 }
 
-int get_sum(int u, int l, int r, int pl, int pr, int add)
-{
-	if (l >= pl && r <= pr) return tr[u].sum + (r - l + 1) * add;
-	int mid = l + r >> 1, res = 0;
-	add += tr[u].add;
-	if (pl <= mid)
-	{
-		if (tr[u].l) res += get_sum(tr[u].l, l, mid, pl, pr, add);
-		else res += intersection(l, mid, pl, pr) * add;
+inline int Sum(int x, int l, int r, int ll, int rr, int add){
+	if(ll <= l && r <= rr) return outer_tree[x].sum + (r-l+1) * add;
+	int mid = (l + r) >> 1, ans = 0;
+	add += outer_tree[x].add;
+	if(ll <= mid){
+		if(outer_tree[x].ls) ans += Sum(outer_tree[x].ls, l, mid, ll, rr, add);
+		else ans += Intersection(l, mid, ll, rr) * add;
 	}
-	if (pr > mid)
-	{
-		if (tr[u].r) res += get_sum(tr[u].r, mid + 1, r, pl, pr, add);
-		else res += intersection(mid + 1, r, pl, pr) * add;
+	if(rr > mid){
+		if(outer_tree[x].rs) ans += Sum(outer_tree[x].rs, mid+1, r, ll, rr, add);
+		else ans += Intersection(mid+1, r, ll, rr) * add;
 	}
-	return res;
+	return ans;
 }
 
-int query(int u, int a, int b, int c)
-{
-	if (L[u] == R[u]) return R[u];
-	int mid = L[u] + R[u] >> 1;
-	int k = get_sum(T[u << 1 | 1], 1, n, a, b, 0);
-	if (k >= c) return query(u << 1 | 1, a, b, c);
-	return query(u << 1, a, b, c - k);
+inline int Ask(int x, int l, int r, int rank){
+	if(inner_tree[x].l == inner_tree[x].r) return inner_tree[x].r;
+	int mid = (inner_tree[x].l + inner_tree[x].r) >> 1;
+	int tmp = Sum(inner_tree[x<<1|1].serial, 1, n, l, r, 0);
+	if(tmp >= rank) return Ask(x<<1|1, l, r, rank);
+	else return Ask(x<<1, l, r, rank-tmp);
 }
 
-int main()
-{
-	scanf("%d%d", &n, &m);
-	for (int i = 0; i < m; i ++ )
-	{
-		scanf("%d%d%d%d", &q[i].op, &q[i].a, &q[i].b, &q[i].c);
-		if (q[i].op == 1) nums.push_back(q[i].c);
+signed main(){
+	n = Read(), m = Read();
+	for(int i=0; i<m; i++){
+		query[i].op = Read(), query[i].a = Read(), query[i].b = Read(), query[i].c = Read();
+		if(query[i].op == 1) question.push_back(query[i].c);
 	}
-	sort(nums.begin(), nums.end());
-	nums.erase(unique(nums.begin(), nums.end()), nums.end());
-	build(1, 0, nums.size() - 1);
-
-	for (int i = 0; i < m; i ++ )
-	{
-		int op = q[i].op, a = q[i].a, b = q[i].b, c = q[i].c;
-		if (op == 1) change(1, a, b, get(c));
-		else printf("%d\n", nums[query(1, a, b, c)]);
+	sort(question.begin(), question.end());
+	question.erase(unique(question.begin(), question.end()), question.end());
+	Build(1, 0, question.size()-1);
+	for(int i=0; i<m; i++){
+		int op = query[i].op, a = query[i].a, b = query[i].b, c = query[i].c;
+		if(op == 1) Change(1, a, b, Get(c));
+		else printf("%d\n", question[Ask(1, a, b, c)]);	
 	}
-
 	return 0;
 }
