@@ -6,8 +6,9 @@
 #include<algorithm>
 #include<climits>
 #define int long long
+#define fake false
 using namespace std;
-const int MaxN = 2000;
+const int MaxN = 2003;
 double v[MaxN][MaxN];
 int n, k, t[MaxN], x[MaxN], y[MaxN], f[MaxN], cnt;
 struct Path{
@@ -44,9 +45,9 @@ inline bool Check(int cur){
 		for(int j=0; j<=i-1; j++){
 			if(v[i][j] <= dis) f[i] = max(f[i], f[j]+1);
 		}
-		if(f[i] >= k) return true;
+		if(f[i] >= k) return !fake;
 	}
-	return false;
+	return fake;
 }
 
 inline void Calculate(int ansDist2, int ansTime){
