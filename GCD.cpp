@@ -3,13 +3,16 @@
 #include<cstdlib>
 #include<cmath>
 #include<cstring>
-#include<climits>
 #include<algorithm>
+#include<climits>
+#include<queue>
+#include<vector>
+#include<utility>
 #define int long long
+#define fake false
 using namespace std;
 const int MaxN = 10000007;
-int n, ans, prime[MaxN], phi[MaxN], sum[MaxN];
-bool notPrime[MaxN];
+int a, b, prime[MaxN], cnt, sum[MaxN], visited[MaxN];
 
 inline int Read(){
 	int num = 0, op = 1;
@@ -25,34 +28,33 @@ inline int Read(){
 	return num * op;
 }
 
-inline void Eular(int n){
-	phi[1] = 1;
-	for(int i=2; i<=n; i++){
-		if(!notPrime[i]){
-			prime[++prime[0]] = i;
-			phi[i] = i-1;
+inline void Init(){
+	for(int i=2; i<MaxN; i++){
+		if(!visited[i]){
+			sum[i] = visited[i] = i;
+			prime[++cnt] = i;
 		}
-		for(int j=1; j<=prime[0] && i*prime[j] <= n; j++){
-			notPrime[i*prime[j]] = true;
-			if(i % prime[j] == 0){
-				phi[i*prime[j]] = phi[i] * prime[j];
-				break;
+		for(int j=1; j<=cnt && prime[j]*i < MaxN; j++){
+			if(prime[j] > visited[i]) break;
+			visited[i * prime[j]] = prime[j];
+			if(!sum[i*prime[j]]){
+				if(sum[i] == 1 || sum[prime[j]] == 1){
+					sum[i*prime[j]] = 1;
+					continue;
+				}
+				if(visited[i] == visited[prime[j]]) sum[i*prime[j]] = visited[i];
+				else sum[i*prime[j]] = 1;
 			}
-			else phi[i*prime[j]] = phi[i] * phi[prime[j]];
 		}
 	}
+	for(int i=1; i<MaxN; i++)
+		sum[i] += sum[i-1];
 	return;
 }
 
 signed main(){
-	n = Read();
-	Eular(n);
-	for(int i=1; i<=n; i++)
-		sum[i] = sum[i-1] + phi[i];
-	for(int i=1; i<=prime[0] && prime[i] <= n; i++)
-		ans += (sum[n/prime[i]] << 1) - 1;
-	printf("%lld\n", ans);
-//	for(int i=1; i<=n; i++)
-//		printf("%lld ", phi[i]);
+	Init();
+	a = Read(), b = Read();
+	printf("%lld", sum[b] - sum[a-1]);
 	return 0;
 }
