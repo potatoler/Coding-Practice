@@ -5,11 +5,13 @@
 #include<cstring>
 #include<algorithm>
 #include<climits>
+#include<queue>
+#include<vector>
 #define int long long
 using namespace std;
 const int MaxN = 300005;
-int n, a[MaxN], b[MaxN], ans = LLONG_MAX, sum;
-int str[MaxN];
+int n, a[MaxN], b[MaxN];
+priority_queue<int, vector<int>, greater<int> > q;
 
 inline int Read(){
 	int num = 0, op = 1;
@@ -25,41 +27,27 @@ inline int Read(){
 	return num * op;
 }
 
-inline bool Judge(){
-	int num = 0;
-	for(int i=1; i<=n; i++){
-		if(str[i] == 1) num++;
-		if(str[i] == 2) num--;
-		if(num < 0) return false;
-	}
-	if(num == 0) return true;
-	return false;
-}
-
-inline void DFS(int len){
-	if(len == n+1){
-//		for(int i=1; i<len; i++)
-//			printf("%lld", str[i]);
-//		printf(" %lld\n", sum);
-		if(Judge()) ans = min(ans, sum);
-		return;
-	}
-	str[len] = 1, sum += a[len];
-	DFS(len+1);
-	sum -= a[len];
-	str[len] = 2, sum += b[len];
-	DFS(len+1);
-	sum -= b[len];
-	return;
-}
-
 signed main(){
 	n = Read();
 	for(int i=1; i<=n; i++)
 		a[i] = Read();
 	for(int i=1; i<=n; i++)
 		b[i] = Read();
-	DFS(1);
+	int ans = a[1] + b[2];
+	q.push(a[2]-b[2]);
+	for(int i=3; i<=n; i+=2){
+		int value = q.top();
+		if(value + b[i] + b[i+1] <= a[i] + b[i+1]){
+			ans += value + b[i] + b[i+1];
+			q.pop();
+			q.push(a[i] - b[i]);
+			q.push(a[i+1] - b[i+1]);
+		}
+		else{
+			ans += a[i] + b[i+1];
+			q.push(a[i+1] - b[i+1]);
+		}
+	}
 	printf("%lld", ans);
 	return 0;
 }

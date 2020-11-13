@@ -10,6 +10,7 @@
 using namespace std;
 const int MaxN = 100005, Mod = 1000000007;
 int n, a[MaxN], pos[MaxN], value[MaxN], cnt, ans;
+
 class BinaryIndexedTree{
 	private:
 	int f[MaxN], g[MaxN];
