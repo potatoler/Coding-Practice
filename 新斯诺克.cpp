@@ -39,7 +39,7 @@ inline void MergeSort(int l, int r){
 		else tmp[pos++] = value[p++];
 	}
 	while(p <= mid) tmp[pos++] = value[p++];
-	while(q <= mid) tmp[pos++] = value[q++];
+	while(q <= r) tmp[pos++] = value[q++];
 	for(int i=l; i<=r; i++)
 		value[i] = tmp[i];
 }
