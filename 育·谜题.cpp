@@ -33,10 +33,8 @@ signed main(){
 		while(c){
 			f = min(f, (c-plus) * a + cost);
 			plus = 0;
-			printf("%lld\n", c);
 			if((c&3) == 3){
-				c--;
-				printf("%lld\n", c);
+				c++;
 				plus = 1;
 				cost += a;
 			}
